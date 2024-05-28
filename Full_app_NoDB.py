@@ -11,9 +11,6 @@ from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
 from langchain.llms import HuggingFaceHub
 
-cache_dir="db"
-
-
 
 def get_python_code_info(py_files):
     code_info = []
@@ -52,8 +49,6 @@ def get_vectorstore(text_chunks):
 
 def get_conversation_chain(vectorstore):
     llm = ChatOpenAI()
-    # llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
-
     memory = ConversationBufferMemory(
         memory_key='chat_history', return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
@@ -88,18 +83,16 @@ def main():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = None
 
-    st.subheader("Your PY Files")
 
-
-    st.header("Chat with multiple PY files :books:")
+    st.subheader("Your PHP Files")
+    st.header("Chat with multiple PHP files :books:")
     user_question = st.text_input("Ask a question about your documents:")
-
     if user_question:
-      handle_userinput(user_question)
+       handle_userinput(user_question)
+
     with st.sidebar:
       #try:
         path_input = st.text_input("Enter the path to the directory containing Python files:")
-        handle_previous_inputs = st.checkbox("Handle Previous Inputs")
         if path_input:
             if os.path.exists(path_input) and os.path.isdir(path_input):
                 py_files = []
@@ -112,17 +105,11 @@ def main():
             else:
                 raise FileNotFoundError("Invalid directory path. Please enter a valid path.")
         if st.button("Handel New Files"):
-         with st.spinner("Processing Python code..."):
-             raw_code_info = get_python_code_info(py_files)
-             code_chunks = get_code_chunks(raw_code_info)
-             text_chunks_with_paths = [(chunk[0], chunk[1]) for chunk in code_chunks]
-             #text_chunks_with_paths = [(chunk[0], chunk[1]) for chunk in code_chunks]  # Include file paths as part of text chunks
-             vectorstore = get_vectorstore(text_chunks_with_paths)
-             #vectorstore = get_vectorstore([[chunk[1], chunk[2]] for chunk in code_chunks])
-             st.session_state.conversation = get_conversation_chain(vectorstore)
-             #save_data(vectorstore, code_chunks)
-
-
+            with st.spinner("Processing PHP code..."):
+                raw_code_info = get_python_code_info(py_files)
+                code_chunks = get_code_chunks(raw_code_info)
+                text_chunks_with_paths = [(chunk[0], chunk[1]) for chunk in code_chunks]
+                vectorstore = get_vectorstore(text_chunks_with_paths)
+                st.session_state.conversation = get_conversation_chain(vectorstore)
 if __name__ == '__main__':
     main()
-
